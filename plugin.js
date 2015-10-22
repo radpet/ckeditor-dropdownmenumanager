@@ -13,7 +13,7 @@ CKEDITOR.plugins.add('dropdownmenumanager', {
 /**
  *  Init function that registers a DropdownMenuManager instance
  *  to manage the passed from the CKEditor config dropdown menus' description.
- *  @param editor {Object} The ckeditor's instance object.
+ *  @param editor {Object}
  */
 function pluginInit(editor) {
   var dropdownMenuManager = new DropdownMenuManager();
@@ -36,20 +36,23 @@ function pluginInit(editor) {
   function addDropdownIntoEditor(menu) {
     editor.addMenuItems(menu.getItems());
     if (menu.getMenuLabel()) {
-      CKEDITOR.addCss('.cke_button__' + menu.getMenuGroup().toLowerCase() + '_label{display: inline !important;overflow:hidden;width:' + menu.getLabelWidth() + 'px;');
+      CKEDITOR.addCss('.cke_button__' + menu.getMenuGroup().toLowerCase() + '_label{display: inline !important;overflow:hidden;width:' + menu.getLabelWidth() + 'px;}');
     }
     editor.ui.add(menu.getMenuGroup(), CKEDITOR.UI_MENUBUTTON, {
-      label: menu.getMenuLabel(),
-      icon: 'dropdown',
-      name: menu.getMenuGroup(),
-      onMenu: function () {
-        var active = {};
-        for (var p in menu.getItems()) {
-          active[p] = CKEDITOR.TRISTATE_OFF;
+        label: menu.getMenuLabel(),
+        icon: menu.getIconPath(),
+        name: menu.getMenuGroup(),
+        onMenu: function () {
+          var active = {};
+          var items = menu.getItems();
+          for (var p in items) {
+            active[p] = editor.getCommand(items[p].command).state;
+          }
+          return active;
         }
-        return active;
       }
-    });
+    )
+    ;
   }
 }
 
@@ -75,6 +78,7 @@ function DropdownMenuManager() {
           name: menuGroup,
           label: config[menuGroup].label ? config[menuGroup].label.text : '',
           width: config[menuGroup].label ? config[menuGroup].label.width : 0,
+          iconPath: config[menuGroup].iconPath ? config[menuGroup].iconPath : 'dropdown'
         });
         editor.addMenuGroup(menuGroup);
         var itemsOfMenuGroup = config[menuGroup].items;
@@ -92,7 +96,7 @@ function DropdownMenuManager() {
 
 /**
  *  Class used to hold items in particular dropdown menu.
- *  @param menuGroup {String} Name of the menu group that this dropdown adds its items.
+ *  @param menugGroup {String} Name of the menu group that this dropdown adds its items.
  **/
 function DropdownMenu(menuGroup) {
   var items = {};
@@ -104,12 +108,13 @@ function DropdownMenu(menuGroup) {
   this.addItem = function (item) {
     item['group'] = menuGroup.name;
     item['role'] = 'menuitemcheckbox';
-    items[item['label']] = item;
+    item['label'] = item['label'] ? item['label'] : item['name'];
+    items[item['name']] = item;
   };
 
   this.getLabelWidth = function () {
     return menuGroup.width;
-  }
+  };
 
   this.getMenuGroup = function () {
     return menuGroup.name;
@@ -117,5 +122,9 @@ function DropdownMenu(menuGroup) {
 
   this.getMenuLabel = function () {
     return menuGroup.label ? menuGroup.label : '';
-  }
+  };
+
+  this.getIconPath = function () {
+    return menuGroup.iconPath;
+  };
 }
