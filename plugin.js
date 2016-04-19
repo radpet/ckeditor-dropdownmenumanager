@@ -34,23 +34,35 @@ function pluginInit(editor) {
    *  @param {Object} menu Holds information about particular dropdown menu
    */
   function addDropdownIntoEditor(menu) {
-    editor.addMenuItems(menu.getItems());
-    if (menu.getMenuLabel()) {
+    var items = menu.getItems();
+    editor.addMenuItems(items);
+    if (menu.getMenuLabel() && menu.isVisible()) {
       CKEDITOR.addCss('.cke_button__' + menu.getMenuGroup().toLowerCase() + '_label{display: inline !important;overflow:hidden;width:' + menu.getLabelWidth() + 'px;}');
     }
-    editor.ui.add(menu.getMenuGroup(), CKEDITOR.UI_MENUBUTTON, {
-        label: menu.getMenuLabel(),
-        icon: menu.getIconPath(),
-        name: menu.getMenuGroup(),
-        onMenu: function () {
-          var active = {};
-          var items = menu.getItems();
-          for (var p in items) {
-            active[p] = editor.getCommand(items[p].command).state;
-          }
-          return active;
-        }
+
+    Object.keys(items).forEach(function (key) {
+      if (items[key].labelPromise) {
+        items[key].labelPromise().then(function (label) {
+          editor.getMenuItem(items[key].name).label = label;
+        }).catch(function () {
+          console.error('Could not resolve labels for', items[key]);
+        });
       }
+    });
+
+    editor.ui.add(menu.getMenuGroup(), CKEDITOR.UI_MENUBUTTON, {
+          label: menu.getMenuLabel(),
+          icon: menu.getIconPath(),
+          name: menu.getMenuGroup(),
+          onMenu: function () {
+            var active = {};
+            var items = menu.getItems();
+            for (var p in items) {
+              active[p] = editor.getCommand(items[p].command).state;
+            }
+            return active;
+          }
+        }
     )
     ;
   }
@@ -78,6 +90,7 @@ function DropdownMenuManager() {
           name: menuGroup,
           label: config[menuGroup].label ? config[menuGroup].label.text : '',
           width: config[menuGroup].label ? config[menuGroup].label.width : 0,
+          visible: config[menuGroup].label ? config[menuGroup].label.visible : false,
           iconPath: config[menuGroup].iconPath ? config[menuGroup].iconPath : 'dropdown'
         });
         editor.addMenuGroup(menuGroup);
@@ -108,7 +121,11 @@ function DropdownMenu(menuGroup) {
   this.addItem = function (item) {
     item['group'] = menuGroup.name;
     item['role'] = 'menuitemcheckbox';
-    item['label'] = item['label'] ? item['label'] : item['name'];
+    if (typeof item['label'] !== 'string') {
+      item['labelPromise'] = item['label'];
+      item['label'] = item['name'];
+    }
+
     items[item['name']] = item;
   };
 
@@ -121,7 +138,14 @@ function DropdownMenu(menuGroup) {
   };
 
   this.getMenuLabel = function () {
-    return menuGroup.label ? menuGroup.label : '';
+    return menuGroup.label;
+  };
+
+  this.isVisible = function () {
+    if (menuGroup.visible == undefined) {
+      return true;
+    }
+    return menuGroup.visible;
   };
 
   this.getIconPath = function () {

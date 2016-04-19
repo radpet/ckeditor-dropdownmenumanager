@@ -12,16 +12,21 @@ config.dropdownmenumanager: {
               command: 'paste'
              }, {
                name: 'PasteText',
-               label: 'Paste as text',
+               label: 'Paste as text'
                command: 'pastetext'
              }, {
                name: 'PasteFromWord',
-               label: 'Paste from Word',
+               label: function(){ // If the menu is opened and the promise has not been resolved the menu label is equal to the name
+                  return Promise.resolve(function(){
+                    return 'Paste from Word'
+                  });
+               },
                command: 'pastefromword'
              }],
             label: {
               text: 'Paste',
-              width: 45
+              width: 45,
+              visible:true //default value
             },
             iconPath: paste //You can use global icons or absolute path to the icon
           }
