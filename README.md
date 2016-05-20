@@ -12,7 +12,7 @@ config.dropdownmenumanager: {
               command: 'paste'
              }, {
                name: 'PasteText',
-               label: 'Paste as text'
+               label: 'Paste as text',
                command: 'pastetext'
              }, {
                name: 'PasteFromWord',
@@ -28,7 +28,7 @@ config.dropdownmenumanager: {
               width: 45,
               visible:true //default value
             },
-            iconPath: paste //You can use global icons or absolute path to the icon
+            iconPath: 'paste' //You can use global icons or absolute path to the icon
             toolbar: 'clipboard', // to specify toolbar group for button
           }
 }
@@ -47,7 +47,7 @@ If going this route, you will likely want to remove the regular buttons as they 
 
 ```js
 {
-  toolbarGroup: [
+  toolbarGroups: [
     {name: 'clipboard'} // now includes paste dropdown menu
   ],
   removeButtons: 'Paste,PasteText,PasteFromWord'
