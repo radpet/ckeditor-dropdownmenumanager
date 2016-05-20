@@ -29,9 +29,27 @@ config.dropdownmenumanager: {
               visible:true //default value
             },
             iconPath: paste //You can use global icons or absolute path to the icon
+            toolbar: 'clipboard', // to specify toolbar group for button
           }
 }
 ```
 
 To add the dropdown on the toolbar use the keys in the 'config.dropdownmenumanager' object , in this case:
 'PasteMenu'
+
+### Using toolbar groups
+
+You can specify a `toolbar` property in the label of dropdown menu configuration.
+
+This specifies which toolbarGroup the dropdown button will placed on.
+
+If going this route, you will likely want to remove the regular buttons as they will be shown in the toolbar, in addition to the dropdown:
+
+```js
+{
+  toolbarGroup: [
+    {name: 'clipboard'} // now includes paste dropdown menu
+  ],
+  removeButtons: 'Paste,PasteText,PasteFromWord'
+}
+```
