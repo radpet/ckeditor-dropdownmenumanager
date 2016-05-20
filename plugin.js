@@ -54,6 +54,7 @@ function pluginInit(editor) {
           label: menu.getMenuLabel(),
           icon: menu.getIconPath(),
           name: menu.getMenuGroup(),
+          toolbar: menu.getToolbarGroup(),
           onMenu: function () {
             var active = {};
             var items = menu.getItems();
@@ -88,6 +89,7 @@ function DropdownMenuManager() {
       if (config.hasOwnProperty(menuGroup)) {
         this.addMenuGroup(menuGroup, {
           name: menuGroup,
+          toolbar: config[menuGroup].toolbar || null,
           label: config[menuGroup].label ? config[menuGroup].label.text : '',
           width: config[menuGroup].label ? config[menuGroup].label.width : 0,
           visible: config[menuGroup].label ? config[menuGroup].label.visible : false,
@@ -127,6 +129,10 @@ function DropdownMenu(menuGroup) {
     }
 
     items[item['name']] = item;
+  };
+
+  this.getToolbarGroup = function () {
+    return menuGroup.toolbar;
   };
 
   this.getLabelWidth = function () {
